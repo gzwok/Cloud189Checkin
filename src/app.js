@@ -57,22 +57,22 @@ const doTask = async (cloudClient) => {
 };
 
 const doFamilyTask = async (cloudClient) => {
-  const { familyInfoResp } = await cloudClient.getFamilyList();
-  const result = [];
-  if (familyInfoResp) {
-    for (let index = 0; index < familyInfoResp.length; index += 1) {
-      const { familyId } = familyInfoResp[index];
-      console.log(familyId);
-      const res = await cloudClient.familyUserSign(familyId);
-      result.push(
-        "家庭任务" +
-          `${res.signStatus ? "已经签到过了，" : ""}签到获得${
-            res.bonusSpace
-          }M空间`
-      );
+    const { familyInfoResp } = await cloudClient.getFamilyList();
+    const result = [];
+    if (familyInfoResp) {
+        for (let index = 0; index < familyInfoResp.length; index += 1) {
+            const { familyId } = familyInfoResp[index];
+            console.log(familyId);
+            const res = await cloudClient.familyUserSign(familyId);
+            result.push(
+                "家庭任务" + `${familyId}`+
+                `${res.signStatus ? "已经签到过了，" : ""}签到获得${
+                    res.bonusSpace
+                }M空间`
+            );
+        }
     }
-  }
-  return result;
+    return result;
 };
 
 const pushServerChan = (title, desp) => {
