@@ -227,7 +227,7 @@ async function main() {
           throw e;
         }
       } finally {
-        logger.log(`账户 ${userNameInfo}执行完毕`);
+        logger.log(`账户 ${userNameInfo}执行完毕----------`);
       }
     }
   }
