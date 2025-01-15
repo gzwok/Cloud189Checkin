@@ -41,17 +41,17 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const doTask = async (cloudClient) => {
   const result = [];
   const res1 = await cloudClient.userSign();
-  result.push(
-    `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
-  );
-  await delay(5000); // 延迟5秒
+  //result.push(
+  //  `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
+ // );
+//  await delay(5000); // 延迟5秒
 
-  const res2 = await cloudClient.taskSign();
-  buildTaskResult(res2, result);
+ // const res2 = await cloudClient.taskSign();
+  //buildTaskResult(res2, result);
 
-  await delay(5000); // 延迟5秒
-  const res3 = await cloudClient.taskPhoto();
-  buildTaskResult(res3, result);
+//  await delay(5000); // 延迟5秒
+  //const res3 = await cloudClient.taskPhoto();
+ // buildTaskResult(res3, result);
 
   return result;
 };
@@ -209,12 +209,12 @@ async function main() {
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
         logger.log(
-          `个人总容量：${(
+          `个人：${(
             cloudCapacityInfo.totalSize /
             1024 /
             1024 /
             1024
-          ).toFixed(2)}G,家庭总容量：${(
+          ).toFixed(2)}G,家庭：${(
             familyCapacityInfo.totalSize /
             1024 /
             1024 /
@@ -237,7 +237,7 @@ async function main() {
   } finally {
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    push("天翼云盘自动签到任务", content);
+    push("GQQ天翼云盘签到", content);
     recording.erase();
   }
 })();
