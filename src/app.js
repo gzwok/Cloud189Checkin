@@ -194,11 +194,12 @@ const push = (title, desp) => {
 async function main() {
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
+    const number = index +1
     const { userName, password } = account;
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`${index}`+"."+`账户 ${userNameInfo}开始执行`);
+        logger.log(`${number}`+"."+`账户 ${userNameInfo}开始执行`);
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
         const result = await doTask(cloudClient);
