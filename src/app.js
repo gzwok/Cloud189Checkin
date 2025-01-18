@@ -195,7 +195,7 @@ async function main() {
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
     const number = index +1;
-    await delay(5000); // 延迟5秒
+    //await delay(5000); // 延迟5秒
     const { userName, password } = account;
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
