@@ -47,11 +47,11 @@ const doTask = async (cloudClient) => {
   await delay(5000); // 延迟5秒
 
  // const res2 = await cloudClient.taskSign();
-  //buildTaskResult(res2, result);
+ // buildTaskResult(res2, result);
 
-//  await delay(5000); // 延迟5秒
+  await delay(5000); // 延迟5秒
   //const res3 = await cloudClient.taskPhoto();
- // buildTaskResult(res3, result);
+  //buildTaskResult(res3, result);
 
   return result;
 };
@@ -194,8 +194,7 @@ const push = (title, desp) => {
 async function main() {
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
-    const number = index +1;
-    //await delay(5000); // 延迟5秒
+   const number = index +1;
     const { userName, password } = account;
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
@@ -207,7 +206,7 @@ async function main() {
         result.forEach((r) => logger.log(r));
         const familyResult = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
-        
+        //logger.log("任务执行完毕");
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
         logger.log(
@@ -228,7 +227,9 @@ async function main() {
         if (e.code === "ETIMEDOUT") {
           throw e;
         }
-      } 
+      } finally {
+        logger.log(`账户 ${userNameInfo}执行完毕-------------`);
+      }
     }
   }
 }
@@ -239,7 +240,7 @@ async function main() {
   } finally {
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    push("GQQ天翼云盘签到", content);
+    push("天翼云盘签到任务", content);
     recording.erase();
   }
 })();
