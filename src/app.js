@@ -43,7 +43,7 @@ const doTask = async (cloudClient) => {
   const res1 = await cloudClient.userSign();
   result.push(
     `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
- // );
+  );
   await delay(5000); // 延迟5秒
 
  // const res2 = await cloudClient.taskSign();
