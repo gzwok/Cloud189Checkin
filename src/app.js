@@ -43,15 +43,15 @@ const doTask = async (cloudClient) => {
   const res1 = await cloudClient.userSign();
   result.push(
     `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
-  );
+ // );
   await delay(5000); // 延迟5秒
 
-  const res2 = await cloudClient.taskSign();
-  buildTaskResult(res2, result);
+ // const res2 = await cloudClient.taskSign();
+  //buildTaskResult(res2, result);
 
-  await delay(5000); // 延迟5秒
-  const res3 = await cloudClient.taskPhoto();
-  buildTaskResult(res3, result);
+//  await delay(5000); // 延迟5秒
+  //const res3 = await cloudClient.taskPhoto();
+ // buildTaskResult(res3, result);
 
   return result;
 };
@@ -194,27 +194,29 @@ const push = (title, desp) => {
 async function main() {
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
+    const number = index +1;
+    //await delay(5000); // 延迟5秒
     const { userName, password } = account;
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`账户 ${userNameInfo}开始执行`);
+        logger.log(`${number}`+"."+`账户 ${userNameInfo}开始执行`);
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
         const result = await doTask(cloudClient);
         result.forEach((r) => logger.log(r));
         const familyResult = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
-        logger.log("任务执行完毕");
+        
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
         logger.log(
-          `个人总容量：${(
+          `个人：${(
             cloudCapacityInfo.totalSize /
             1024 /
             1024 /
             1024
-          ).toFixed(2)}G,家庭总容量：${(
+          ).toFixed(2)}G,家庭：${(
             familyCapacityInfo.totalSize /
             1024 /
             1024 /
@@ -226,9 +228,7 @@ async function main() {
         if (e.code === "ETIMEDOUT") {
           throw e;
         }
-      } finally {
-        logger.log(`账户 ${userNameInfo}执行完毕!!!!!!!!!!!!!!!!!`);
-      }
+      } 
     }
   }
 }
@@ -239,7 +239,7 @@ async function main() {
   } finally {
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    push("天翼云盘自动签到任务", content);
+    push("GQQ天翼云盘签到", content);
     recording.erase();
   }
 })();
