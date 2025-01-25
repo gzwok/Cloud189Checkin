@@ -229,7 +229,7 @@ async function main() {
         }
       } finally {
         logger.log(`账户 ${userNameInfo}执行完毕---------------`);
-        await delay(5000);
+       // await delay(5000);
       }
     }
   }
