@@ -230,7 +230,7 @@ async function main() {
         }
       } finally {
         logger.log(`账户 ${userNameInfo}执行完毕---------------`);
-        const all = all + familyCapacityInfo.totalSize;
+         all = all + familyCapacityInfo.totalSize;
         logger.log(`${all}`);
        // await delay(5000);
       }
