@@ -192,7 +192,7 @@ const push = (title, desp) => {
 
 // 开始执行程序
 async function main() {
-  const all = 0;
+
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
    const number = index +1;
@@ -200,7 +200,7 @@ async function main() {
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`${number}`+".  "+`账户 ${userNameInfo}开始执行`);
+        logger.log(`${number}`+".    "+`账户 ${userNameInfo}开始执行`);
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
         const result = await doTask(cloudClient);
@@ -223,8 +223,7 @@ async function main() {
             1024
           ).toFixed(2)}G`
         );
-                all = all + familyCapacityInfo.totalSize;
-        logger.log(`${all}`);
+
       } catch (e) {
         logger.error(e);
         if (e.code === "ETIMEDOUT") {
