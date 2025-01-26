@@ -223,6 +223,8 @@ async function main() {
             1024
           ).toFixed(2)}G`
         );
+                all = all + familyCapacityInfo.totalSize;
+        logger.log(`${all}`);
       } catch (e) {
         logger.error(e);
         if (e.code === "ETIMEDOUT") {
@@ -230,8 +232,7 @@ async function main() {
         }
       } finally {
         logger.log(`账户 ${userNameInfo}执行完毕---------------`);
-         all = all + familyCapacityInfo.totalSize;
-        logger.log(`${all}`);
+ 
        // await delay(5000);
       }
     }
