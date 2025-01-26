@@ -192,6 +192,7 @@ const push = (title, desp) => {
 
 // 开始执行程序
 async function main() {
+  const all = 0;
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
    const number = index +1;
@@ -229,6 +230,8 @@ async function main() {
         }
       } finally {
         logger.log(`账户 ${userNameInfo}执行完毕---------------`);
+        const all = all + familyCapacityInfo.totalSize;
+        logger.log(`${all}`);
        // await delay(5000);
       }
     }
