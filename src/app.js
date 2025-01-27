@@ -201,6 +201,11 @@ let totalFamilyBonusSpace = 0;
       const userNameInfo = mask(userName, 3, 7);
       try {
         logger.log(`${number}`+".    "+`账户 ${userNameInfo}开始执行`);
+         if(index = 19){
+           const { cloudCapacityInfoold, familyCapacityInfoold } =
+          await cloudClient.getUserSizeInfo();
+           logger.info(`主号昨天家庭 ${familyCapacityInfoold.totalSize / 2}G空间`);
+        }
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
         const result = await doTask(cloudClient);
@@ -208,9 +213,10 @@ let totalFamilyBonusSpace = 0;
         const familyResult = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
         //logger.log("任务执行完毕");
+       
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
-         totalFamilyBonusSpace += res.bonusSpace;
+        
         logger.log(
           `个人：${(
             cloudCapacityInfo.totalSize /
@@ -232,7 +238,7 @@ let totalFamilyBonusSpace = 0;
         }
       } finally {
         logger.log(`账户 ${userNameInfo}执行完毕---------------`);
-   logger.info(`所有账号家庭签到总共获得 ${totalFamilyBonusSpace / 2}M空间`);
+  
        // await delay(5000);
       }
     }
