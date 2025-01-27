@@ -202,7 +202,7 @@ async function main() {
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`${number}`+".    "+`账户 ${userNameInfo}开始执行`);
+        logger.log(`${number}`+".    "+`  账户 ${userNameInfo}开始执行`);
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
         const result = await doTask(cloudClient);
@@ -214,12 +214,12 @@ async function main() {
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
         logger.log(
-          `个人总容量：${(
+          `个人：${(
             cloudCapacityInfo.totalSize /
             1024 /
             1024 /
             1024
-          ).toFixed(2)}G, 家庭总容量：${(
+          ).toFixed(2)}G, 家庭：${(
             familyCapacityInfo.totalSize /
             1024 /
             1024 /
@@ -232,7 +232,7 @@ async function main() {
           throw e;
         }
       } finally {
-        logger.log(`账户 ${userNameInfo} 执行完毕-------------`);
+        logger.log(`账户 ${userNameInfo} 执行完毕----------------`);
       }
     }
   }
@@ -246,7 +246,6 @@ async function main() {
     const totalFamilySpace = await main();
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    const summary = `GQQ主账号今天共获得家庭空间：${totalFamilySpace}M`;
     push("GQQ天翼云盘签到任务", `${content}\n\n${summary}`);
     recording.erase();
   } catch (error) {
