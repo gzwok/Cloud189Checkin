@@ -210,7 +210,7 @@ let totalFamilyBonusSpace = 0;
         //logger.log("任务执行完毕");
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
-         totalFamilyBonusSpace += familyCapacityInfo.totalSize;
+         totalFamilyBonusSpace += res.bonusSpace;
         logger.log(
           `个人：${(
             cloudCapacityInfo.totalSize /
