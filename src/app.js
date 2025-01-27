@@ -206,22 +206,19 @@ async function main() {
         await cloudClient.login();
         const result = await doTask(cloudClient);
         result.forEach((r) => logger.log(r));
-        const familyResult = await doFamilyTask(cloudClient);
+  const { result: familyResult, totalFamilyBonus } = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
-        //logger.log("任务执行完毕");
-
-       familyResult.forEach((r) => logger.log(r));
         totalFamilySpace += totalFamilyBonus;
 
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
         logger.log(
-          `个人：${(
+          `个人总容量：${(
             cloudCapacityInfo.totalSize /
             1024 /
             1024 /
             1024
-          ).toFixed(2)}G,家庭：${(
+          ).toFixed(2)}G, 家庭总容量：${(
             familyCapacityInfo.totalSize /
             1024 /
             1024 /
@@ -234,10 +231,11 @@ async function main() {
           throw e;
         }
       } finally {
-        logger.log(`账户 ${userNameInfo}执行完毕----------------`);
+        logger.log(`账户 ${userNameInfo} 执行完毕-------------`);
       }
     }
   }
+
   logger.log(`GQQ主账号今天共获得家庭空间：${totalFamilySpace}M`);
   return totalFamilySpace;
 }
