@@ -232,12 +232,12 @@ let totalFamilyBonusSpace = 0;
         }
       } finally {
         logger.log(`账户 ${userNameInfo}执行完毕---------------`);
- 
+   logger.info(`所有账号家庭签到总共获得 ${totalFamilyBonusSpace / 2}M空间`);
        // await delay(5000);
       }
     }
   }
-  logger.info(`所有账号家庭签到总共获得 ${totalFamilyBonusSpace / 2}M空间`);
+
 }
 
 (async () => {
