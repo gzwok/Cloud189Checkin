@@ -192,7 +192,7 @@ const push = (title, desp) => {
 
 // 开始执行程序
 async function main() {
-
+let totalFamilyBonusSpace = 0;
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
    const number = index +1;
@@ -210,6 +210,7 @@ async function main() {
         //logger.log("任务执行完毕");
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
+         totalFamilyBonusSpace += familyCapacityInfo;
         logger.log(
           `个人：${(
             cloudCapacityInfo.totalSize /
@@ -236,6 +237,7 @@ async function main() {
       }
     }
   }
+  logger.info(`所有账号家庭签到总共获得 ${totalFamilyBonusSpace / 2}M空间`);
 }
 
 (async () => {
