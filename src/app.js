@@ -246,7 +246,6 @@ async function main() {
     const totalFamilySpace = await main();
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    push("GQQ天翼云盘签到任务", `${content}\n\n${summary}`);
     recording.erase();
   } catch (error) {
     logger.error("任务执行失败", error);
