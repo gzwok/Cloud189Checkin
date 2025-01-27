@@ -49,7 +49,7 @@ const doTask = async (cloudClient) => {
  // const res2 = await cloudClient.taskSign();
  // buildTaskResult(res2, result);
 
- // await delay(5000); // 延迟5秒
+  await delay(5000); // 延迟5秒
   //const res3 = await cloudClient.taskPhoto();
   //buildTaskResult(res3, result);
 
@@ -192,7 +192,6 @@ const push = (title, desp) => {
 
 // 开始执行程序
 async function main() {
-let totalFamilyBonusSpace = 0;
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
    const number = index +1;
@@ -200,8 +199,7 @@ let totalFamilyBonusSpace = 0;
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`${number}`+".    "+`账户 ${userNameInfo}开始执行`);
-     
+        logger.log(`${number}`+"."+`账户 ${userNameInfo}开始执行`);
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
         const result = await doTask(cloudClient);
@@ -209,10 +207,8 @@ let totalFamilyBonusSpace = 0;
         const familyResult = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
         //logger.log("任务执行完毕");
-       
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
-        
         logger.log(
           `个人：${(
             cloudCapacityInfo.totalSize /
@@ -226,20 +222,16 @@ let totalFamilyBonusSpace = 0;
             1024
           ).toFixed(2)}G`
         );
-
       } catch (e) {
         logger.error(e);
         if (e.code === "ETIMEDOUT") {
           throw e;
         }
       } finally {
-        logger.log(`账户 ${userNameInfo}执行完毕---------------`);
-  
-       // await delay(5000);
+        logger.log(`账户 ${userNameInfo}执行完毕-------------`);
       }
     }
   }
-
 }
 
 (async () => {
