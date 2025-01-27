@@ -201,13 +201,14 @@ let totalFamilyBonusSpace = 0;
       const userNameInfo = mask(userName, 3, 7);
       try {
         logger.log(`${number}`+".    "+`账户 ${userNameInfo}开始执行`);
-         if(index = 19){
+     
+        const cloudClient = new CloudClient(userName, password);
+        await cloudClient.login();
+            if(index = 1){
            const { cloudCapacityInfoold, familyCapacityInfoold } =
           await cloudClient.getUserSizeInfo();
            logger.info(`主号昨天家庭 ${familyCapacityInfoold.totalSize / 2}G空间`);
         }
-        const cloudClient = new CloudClient(userName, password);
-        await cloudClient.login();
         const result = await doTask(cloudClient);
         result.forEach((r) => logger.log(r));
         const familyResult = await doFamilyTask(cloudClient);
