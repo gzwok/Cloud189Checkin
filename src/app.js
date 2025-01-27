@@ -209,6 +209,10 @@ async function main() {
         const familyResult = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
         //logger.log("任务执行完毕");
+
+       familyResult.forEach((r) => logger.log(r));
+        totalFamilySpace += totalFamilyBonus;
+
         const { cloudCapacityInfo, familyCapacityInfo } =
           await cloudClient.getUserSizeInfo();
         logger.log(
