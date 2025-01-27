@@ -243,11 +243,13 @@ async function main() {
 
 (async () => {
   try {
-    await main();
-  } finally {
+    const totalFamilySpace = await main();
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    push("天翼云盘签到任务", content);
+    const summary = `GQQ主账号今天共获得家庭空间：${totalFamilySpace}M`;
+    push("GQQ天翼云盘签到任务", `${content}\n\n${summary}`);
     recording.erase();
+  } catch (error) {
+    logger.error("任务执行失败", error);
   }
 })();
