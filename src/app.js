@@ -194,6 +194,7 @@ const push = (title, desp) => {
 
 // 开始执行程序
 async function main() {
+  let totalFamilySpace = 0;
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
    const number = index +1;
