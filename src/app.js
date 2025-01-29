@@ -247,8 +247,8 @@ async function main() {
   } finally {
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    //push("天翼云盘签到任务", content);
-     push("`获得家庭空间：${totalFamilySpace}M`", content);
+    push("天翼云盘签到任务", content);
+    // push("`获得家庭空间：${totalFamilySpace}M`", content);
     recording.erase();
   }
 })();
