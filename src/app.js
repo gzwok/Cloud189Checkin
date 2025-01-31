@@ -189,11 +189,18 @@ async function main() {
 
 (async () => {
   try {
-    await main();
+    await main(); // 执行主任务
   } finally {
-    const events = recording.replay();
-    const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    pushWxPusher("天翼云盘签到任务", content);
-    recording.erase();
+    try {
+      const events = recording.replay(); // 获取日志
+      const content = events.map((e) => Array.isArray(e.data) ? e.data.join("") : String(e.data)).join("  \n");
+      
+      await pushWxPusher("天翼云盘签到任务", content); // 先推送日志
+      
+    } catch (error) {
+      logger.error("推送日志时发生错误：", error);
+    } finally {
+      recording.erase(); // 确保日志被清理
+    }
   }
 })();
