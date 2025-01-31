@@ -23,9 +23,11 @@ const telegramBot = require("./push/telegramBot");
 const wecomBot = require("./push/wecomBot");
 const wxpush = require("./push/wxPusher");
 const accounts = require("../accounts");
+const retry = require('async-retry'); // 引入重试库
 
 const mask = (s, start, end) => s.split("").fill("*", start, end).join("");
 
+// 重试封装函数
 const buildTaskResult = (res, result) => {
   const index = result.length;
   if (res.errorCode === "User_Not_Chance") {
@@ -40,38 +42,60 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // 任务 1.签到 2.天天抽红包 3.自动备份抽红包
 const doTask = async (cloudClient) => {
   const result = [];
-  const res1 = await cloudClient.userSign();
+
+  // 添加重试机制到签到
+  const res1 = await retry(async () => {
+    return cloudClient.userSign(); // 在此进行重试
+  }, {
+    retries: 3, // 最大重试次数
+    minTimeout: 30000, // 重试间隔 3 0秒
+    onRetry: (err, attempt) => {
+      logger.warn(`签到请求超时，正在进行重试... 第 ${attempt} 次`);
+    }
+  });
+
   result.push(
     `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
   );
+  
   await delay(5000); // 延迟5秒
 
- // const res2 = await cloudClient.taskSign();
- // buildTaskResult(res2, result);
+  // 同样为其他任务（如任务签到、任务拍照等）添加重试机制
+  // const res2 = await retry(async () => cloudClient.taskSign(), { retries: 3 });
+  // buildTaskResult(res2, result);
 
-  //await delay(5000); // 延迟5秒
-  //const res3 = await cloudClient.taskPhoto();
-  //buildTaskResult(res3, result);
+  // await delay(5000); // 延迟5秒
+  // const res3 = await retry(async () => cloudClient.taskPhoto(), { retries: 3 });
+  // buildTaskResult(res3, result);
 
   return result;
 };
 
+// 对家庭任务也增加重试机制
 const doFamilyTask = async (cloudClient) => {
-    const { familyInfoResp } = await cloudClient.getFamilyList();
+  const { familyInfoResp } = await cloudClient.getFamilyList();
   let totalFamilyBonus = 0;
-    const result = [];
-    if (familyInfoResp) {
+  const result = [];
 
-            const res = await cloudClient.familyUserSign(108508161137369);
-            result.push(
-                "家庭任务" +
-                `${res.signStatus ? "已经签到过了，" : ""}签到获得${
-                    res.bonusSpace
-                }M空间`
-            );
-        totalFamilyBonus += res.bonusSpace;
-    }
-   
+  if (familyInfoResp) {
+    // 为家庭签到任务添加重试机制
+    const res = await retry(async () => {
+      return cloudClient.familyUserSign(108508161137369);
+    }, {
+      retries: 3, // 最大重试次数
+      minTimeout: 30000, // 重试间隔 30秒
+      onRetry: (err, attempt) => {
+        logger.warn(`家庭签到请求超时，正在进行重试... 第 ${attempt} 次`);
+      }
+    });
+
+    result.push(
+      "家庭任务" +
+      `${res.signStatus ? "已经签到过了，" : ""}签到获得${res.bonusSpace}M空间`
+    );
+    totalFamilyBonus += res.bonusSpace;
+  }
+
   return { result, totalFamilyBonus };
 };
 
@@ -197,34 +221,29 @@ async function main() {
   let totalFamilySpace = 0;
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
-   const number = index +1;
+    const number = index + 1;
     const { userName, password } = account;
+    
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`${number}`+".    "+`  账户 ${userNameInfo}开始执行`);
+        logger.log(`${number}` + ".    " + `账户 ${userNameInfo} 开始执行`);
         const cloudClient = new CloudClient(userName, password);
         await cloudClient.login();
+        
+        // 执行任务
         const result = await doTask(cloudClient);
         result.forEach((r) => logger.log(r));
-  const { result: familyResult, totalFamilyBonus } = await doFamilyTask(cloudClient);
+        
+        // 执行家庭任务
+        const { result: familyResult, totalFamilyBonus } = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
         totalFamilySpace += totalFamilyBonus;
 
-        const { cloudCapacityInfo, familyCapacityInfo } =
-          await cloudClient.getUserSizeInfo();
+        // 获取并输出云盘容量信息
+        const { cloudCapacityInfo, familyCapacityInfo } = await cloudClient.getUserSizeInfo();
         logger.log(
-          `个人：${(
-            cloudCapacityInfo.totalSize /
-            1024 /
-            1024 /
-            1024
-          ).toFixed(2)}G, 家庭：${(
-            familyCapacityInfo.totalSize /
-            1024 /
-            1024 /
-            1024
-          ).toFixed(2)}G`
+          `个人：${(cloudCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G, 家庭：${(familyCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G`
         );
       } catch (e) {
         logger.error(e);
