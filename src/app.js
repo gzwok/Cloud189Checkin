@@ -40,36 +40,14 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // 任务 1.签到 2.天天抽红包 3.自动备份抽红包
 const doTask = async (cloudClient) => {
   const result = [];
-  
-  // 进行签到并添加超时重试机制
-  const signWithRetry = async (retries = 3) => {
-    let attempt = 0;
-    while (attempt < retries) {
-      try {
-        const res1 = await cloudClient.userSign();
-        result.push(
-          `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
-        );
-        return;
-      } catch (error) {
-        attempt++;
-        if (attempt >= retries) {
-          result.push("签到操作失败，已尝试 " + retries + " 次");
-          logger.error(`签到操作失败，尝试了 ${retries} 次: ${error.message}`);
-          throw error; // 如果超出最大重试次数，则抛出异常
-        }
-        logger.warn(`签到失败，重试第 ${attempt} 次: ${error.message}`);
-        await delay(5000); // 延迟 5 秒再重试
-      }
-    }
-  };
-
-  await signWithRetry(); // 调用签到操作
-
+  const res1 = await cloudClient.userSign();
+  result.push(
+    `${res1.isSign ? "已经签到过了，" : ""}签到获得${res1.netdiskBonus}M空间`
+  );
   await delay(5000); // 延迟5秒
 
-  // const res2 = await cloudClient.taskSign();
-  // buildTaskResult(res2, result);
+ // const res2 = await cloudClient.taskSign();
+ // buildTaskResult(res2, result);
 
   //await delay(5000); // 延迟5秒
   //const res3 = await cloudClient.taskPhoto();
@@ -270,7 +248,6 @@ async function main() {
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
     push("天翼云盘签到任务", content);
-    // push("`获得家庭空间：${totalFamilySpace}M`", content);
     recording.erase();
   }
 })();
