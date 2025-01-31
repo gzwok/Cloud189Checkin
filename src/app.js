@@ -87,7 +87,7 @@ const doFamilyTask = async (cloudClient) => {
   return { result, totalFamilyBonus };
 };
 
-// 推送到WxPusher
+// 推送到WxPusher，并添加重试机制
 const pushWxPusher = (title, desp) => {
   if (!(wxpush.appToken && wxpush.uid)) {
     return;
@@ -99,21 +99,29 @@ const pushWxPusher = (title, desp) => {
     content: desp,
     uids: [wxpush.uid],
   };
-  superagent
-    .post("https://wxpusher.zjiecode.com/api/send/message")
-    .send(data)
-    .end((err, res) => {
-      if (err) {
-        logger.error(`wxPusher推送失败:${JSON.stringify(err)}`);
-        return;
-      }
-      const json = JSON.parse(res.text);
-      if (json.data[0].code !== 1000) {
-        logger.error(`wxPusher推送失败:${JSON.stringify(json)}`);
-      } else {
-        logger.info("wxPusher推送成功");
-      }
-    });
+
+  retry(async () => {
+    return superagent
+      .post("https://wxpusher.zjiecode.com/api/send/message")
+      .send(data)
+      .then((res) => {
+        const json = JSON.parse(res.text);
+        if (json.data[0].code !== 1000) {
+          throw new Error(`wxPusher推送失败:${JSON.stringify(json)}`);
+        } else {
+          logger.info("wxPusher推送成功");
+        }
+      })
+      .catch((err) => {
+        throw new Error(`wxPusher推送失败:${JSON.stringify(err)}`);
+      });
+  }, {
+    retries: 3, // 最大重试次数
+    minTimeout: 30000, // 重试间隔 30 秒
+    onRetry: (err, attempt) => {
+      logger.warn(`wxPusher推送失败，正在进行重试... 第 ${attempt} 次`);
+    }
+  });
 };
 
 // 开始执行程序
