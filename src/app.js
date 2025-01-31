@@ -15,12 +15,8 @@ log4js.configure({
 });
 
 const logger = log4js.getLogger();
-// process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0'
 const superagent = require("superagent");
 const { CloudClient } = require("cloud189-sdk");
-const serverChan = require("./push/serverChan");
-const telegramBot = require("./push/telegramBot");
-const wecomBot = require("./push/wecomBot");
 const wxpush = require("./push/wxPusher");
 const accounts = require("../accounts");
 const retry = require('async-retry'); // 引入重试库
@@ -48,7 +44,7 @@ const doTask = async (cloudClient) => {
     return cloudClient.userSign(); // 在此进行重试
   }, {
     retries: 3, // 最大重试次数
-    minTimeout: 30000, // 重试间隔 3 0秒
+    minTimeout: 30000, // 重试间隔 30 秒
     onRetry: (err, attempt) => {
       logger.warn(`签到请求超时，正在进行重试... 第 ${attempt} 次`);
     }
@@ -59,14 +55,6 @@ const doTask = async (cloudClient) => {
   );
   
   await delay(5000); // 延迟5秒
-
-  // 同样为其他任务（如任务签到、任务拍照等）添加重试机制
-  // const res2 = await retry(async () => cloudClient.taskSign(), { retries: 3 });
-  // buildTaskResult(res2, result);
-
-  // await delay(5000); // 延迟5秒
-  // const res3 = await retry(async () => cloudClient.taskPhoto(), { retries: 3 });
-  // buildTaskResult(res3, result);
 
   return result;
 };
@@ -83,7 +71,7 @@ const doFamilyTask = async (cloudClient) => {
       return cloudClient.familyUserSign(108508161137369);
     }, {
       retries: 3, // 最大重试次数
-      minTimeout: 30000, // 重试间隔 30秒
+      minTimeout: 30000, // 重试间隔 30 秒
       onRetry: (err, attempt) => {
         logger.warn(`家庭签到请求超时，正在进行重试... 第 ${attempt} 次`);
       }
@@ -99,88 +87,7 @@ const doFamilyTask = async (cloudClient) => {
   return { result, totalFamilyBonus };
 };
 
-const pushServerChan = (title, desp) => {
-  if (!serverChan.sendKey) {
-    return;
-  }
-  const data = {
-    title,
-    desp,
-  };
-  superagent
-    .post(`https://sctapi.ftqq.com/${serverChan.sendKey}.send`)
-    .type("form")
-    .send(data)
-    .end((err, res) => {
-      if (err) {
-        logger.error(`ServerChan推送失败:${JSON.stringify(err)}`);
-        return;
-      }
-      const json = JSON.parse(res.text);
-      if (json.code !== 0) {
-        logger.error(`ServerChan推送失败:${JSON.stringify(json)}`);
-      } else {
-        logger.info("ServerChan推送成功");
-      }
-    });
-};
-
-const pushTelegramBot = (title, desp) => {
-  if (!(telegramBot.botToken && telegramBot.chatId)) {
-    return;
-  }
-  const data = {
-    chat_id: telegramBot.chatId,
-    text: `${title}\n\n${desp}`,
-  };
-  superagent
-    .post(`https://api.telegram.org/bot${telegramBot.botToken}/sendMessage`)
-    .type("form")
-    .send(data)
-    .end((err, res) => {
-      if (err) {
-        logger.error(`TelegramBot推送失败:${JSON.stringify(err)}`);
-        return;
-      }
-      const json = JSON.parse(res.text);
-      if (!json.ok) {
-        logger.error(`TelegramBot推送失败:${JSON.stringify(json)}`);
-      } else {
-        logger.info("TelegramBot推送成功");
-      }
-    });
-};
-
-const pushWecomBot = (title, desp) => {
-  if (!(wecomBot.key && wecomBot.telphone)) {
-    return;
-  }
-  const data = {
-    msgtype: "text",
-    text: {
-      content: `${title}\n\n${desp}`,
-      mentioned_mobile_list: [wecomBot.telphone],
-    },
-  };
-  superagent
-    .post(
-      `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=${wecomBot.key}`
-    )
-    .send(data)
-    .end((err, res) => {
-      if (err) {
-        logger.error(`wecomBot推送失败:${JSON.stringify(err)}`);
-        return;
-      }
-      const json = JSON.parse(res.text);
-      if (json.errcode) {
-        logger.error(`wecomBot推送失败:${JSON.stringify(json)}`);
-      } else {
-        logger.info("wecomBot推送成功");
-      }
-    });
-};
-
+// 推送到WxPusher
 const pushWxPusher = (title, desp) => {
   if (!(wxpush.appToken && wxpush.uid)) {
     return;
@@ -209,13 +116,6 @@ const pushWxPusher = (title, desp) => {
     });
 };
 
-const push = (title, desp) => {
-  pushServerChan(title, desp);
-  pushTelegramBot(title, desp);
-  pushWecomBot(title, desp);
-  pushWxPusher(title, desp);
-};
-
 // 开始执行程序
 async function main() {
   let totalFamilySpace = 0;
@@ -229,7 +129,17 @@ async function main() {
       try {
         logger.log(`${number}` + ".    " + `账户 ${userNameInfo} 开始执行`);
         const cloudClient = new CloudClient(userName, password);
-        await cloudClient.login();
+        
+        // 为登录操作添加重试机制
+        await retry(async () => {
+          await cloudClient.login();
+        }, {
+          retries: 3,
+          minTimeout: 30000, // 重试间隔 30 秒
+          onRetry: (err, attempt) => {
+            logger.warn(`登录请求超时，正在进行重试... 第 ${attempt} 次`);
+          }
+        });
         
         // 执行任务
         const result = await doTask(cloudClient);
@@ -241,7 +151,16 @@ async function main() {
         totalFamilySpace += totalFamilyBonus;
 
         // 获取并输出云盘容量信息
-        const { cloudCapacityInfo, familyCapacityInfo } = await cloudClient.getUserSizeInfo();
+        const { cloudCapacityInfo, familyCapacityInfo } = await retry(async () => {
+          return cloudClient.getUserSizeInfo();
+        }, {
+          retries: 3,
+          minTimeout: 30000, // 重试间隔 30 秒
+          onRetry: (err, attempt) => {
+            logger.warn(`获取云盘容量请求超时，正在进行重试... 第 ${attempt} 次`);
+          }
+        });
+        
         logger.log(
           `个人：${(cloudCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G, 家庭：${(familyCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G`
         );
@@ -266,7 +185,7 @@ async function main() {
   } finally {
     const events = recording.replay();
     const content = events.map((e) => `${e.data.join("")}`).join("  \n");
-    push("天翼云盘签到任务", content);
+    pushWxPusher("天翼云盘签到任务", content);
     recording.erase();
   }
 })();
