@@ -1,4 +1,5 @@
 name: Cloud check in action
+
 on:
   push:
     branches:
@@ -27,8 +28,10 @@ jobs:
           secrets_env: production
           prefix_prod: ""
           file_name_prod: .env
-      - name: init
-        run: npm install
+      - name: Install dependencies
+        run: |
+          npm install
+          npm install async-retry  # 确保安装 async-retry 模块
       - name: run
         id: run
         uses: nick-fields/retry@master
