@@ -44,7 +44,7 @@ const doTask = async (cloudClient) => {
     return cloudClient.userSign(); // 在此进行重试
   }, {
     retries: 3, // 最大重试次数
-    minTimeout: 20000, // 重试间隔 20 秒
+    minTimeout: 30000, // 重试间隔 30 秒
     onRetry: (err, attempt) => {
       logger.warn(`签到请求超时，正在进行重试... 第 ${attempt} 次`);
     }
@@ -71,7 +71,7 @@ const doFamilyTask = async (cloudClient) => {
       return cloudClient.familyUserSign(108508161137369);
     }, {
       retries: 3, // 最大重试次数
-      minTimeout: 20000, // 重试间隔 20 秒
+      minTimeout: 30000, // 重试间隔 30 秒
       onRetry: (err, attempt) => {
         logger.warn(`家庭签到请求超时，正在进行重试... 第 ${attempt} 次`);
       }
@@ -117,7 +117,7 @@ const pushWxPusher = (title, desp) => {
       });
   }, {
     retries: 3, // 最大重试次数
-    minTimeout: 20000, // 重试间隔 20 秒
+    minTimeout: 30000, // 重试间隔 30 秒
     onRetry: (err, attempt) => {
       logger.warn(`wxPusher推送失败，正在进行重试... 第 ${attempt} 次`);
     }
@@ -127,8 +127,6 @@ const pushWxPusher = (title, desp) => {
 // 开始执行程序
 async function main() {
   let totalFamilySpace = 0;
-  let accountFamilySpaces = []; // 用于记录每个账号获得的家庭空间
-  
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
     const number = index + 1;
@@ -145,7 +143,7 @@ async function main() {
           await cloudClient.login();
         }, {
           retries: 3,
-          minTimeout: 20000, // 重试间隔 20 秒
+          minTimeout: 30000, // 重试间隔 30 秒
           onRetry: (err, attempt) => {
             logger.warn(`登录请求超时，正在进行重试... 第 ${attempt} 次`);
           }
@@ -159,19 +157,13 @@ async function main() {
         const { result: familyResult, totalFamilyBonus } = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
         totalFamilySpace += totalFamilyBonus;
-        
-        // 记录每个账号获得的家庭空间
-        accountFamilySpaces.push({
-          account: userNameInfo,
-          familySpace: totalFamilyBonus
-        });
 
         // 获取并输出云盘容量信息
         const { cloudCapacityInfo, familyCapacityInfo } = await retry(async () => {
           return cloudClient.getUserSizeInfo();
         }, {
           retries: 3,
-          minTimeout: 20000, // 重试间隔 20 秒
+          minTimeout: 30000, // 重试间隔 30 秒
           onRetry: (err, attempt) => {
             logger.warn(`获取云盘容量请求超时，正在进行重试... 第 ${attempt} 次`);
           }
@@ -191,12 +183,7 @@ async function main() {
     }
   }
 
-  // 输出总家庭空间和每个账号获得的家庭空间
   logger.log(`GQQ主账号今天共获得家庭空间：${totalFamilySpace}M`);
-  accountFamilySpaces.forEach(( { account, familySpace }, index) => {
-    logger.log(`${index + 1}. 账户${account} 获得：${familySpace}M`);
-  });
-
   return totalFamilySpace;
 }
 
