@@ -127,6 +127,8 @@ const pushWxPusher = (title, desp) => {
 // 开始执行程序
 async function main() {
   let totalFamilySpace = 0;
+  let accountFamilySpaces = []; // 用于记录每个账号获得的家庭空间
+  
   for (let index = 0; index < accounts.length; index += 1) {
     const account = accounts[index];
     const number = index + 1;
@@ -157,6 +159,12 @@ async function main() {
         const { result: familyResult, totalFamilyBonus } = await doFamilyTask(cloudClient);
         familyResult.forEach((r) => logger.log(r));
         totalFamilySpace += totalFamilyBonus;
+        
+        // 记录每个账号获得的家庭空间
+        accountFamilySpaces.push({
+          account: userNameInfo,
+          familySpace: totalFamilyBonus
+        });
 
         // 获取并输出云盘容量信息
         const { cloudCapacityInfo, familyCapacityInfo } = await retry(async () => {
@@ -183,7 +191,12 @@ async function main() {
     }
   }
 
+  // 输出总家庭空间和每个账号获得的家庭空间
   logger.log(`GQQ主账号今天共获得家庭空间：${totalFamilySpace}M`);
+  accountFamilySpaces.forEach(( { account, familySpace }, index) => {
+    logger.log(`${index + 1}. 账户${account} 获得：${familySpace}M`);
+  });
+
   return totalFamilySpace;
 }
 
