@@ -44,7 +44,7 @@ const doTask = async (cloudClient) => {
     return cloudClient.userSign(); // 在此进行重试
   }, {
     retries: 3, // 最大重试次数
-    minTimeout: 30000, // 重试间隔 30 秒
+    minTimeout: 20000, // 重试间隔 20 秒
     onRetry: (err, attempt) => {
       logger.warn(`签到请求超时，正在进行重试... 第 ${attempt} 次`);
     }
@@ -71,7 +71,7 @@ const doFamilyTask = async (cloudClient) => {
       return cloudClient.familyUserSign(108508161137369);
     }, {
       retries: 3, // 最大重试次数
-      minTimeout: 30000, // 重试间隔 30 秒
+      minTimeout: 20000, // 重试间隔 20 秒
       onRetry: (err, attempt) => {
         logger.warn(`家庭签到请求超时，正在进行重试... 第 ${attempt} 次`);
       }
@@ -117,7 +117,7 @@ const pushWxPusher = (title, desp) => {
       });
   }, {
     retries: 3, // 最大重试次数
-    minTimeout: 30000, // 重试间隔 30 秒
+    minTimeout: 20000, // 重试间隔 20 秒
     onRetry: (err, attempt) => {
       logger.warn(`wxPusher推送失败，正在进行重试... 第 ${attempt} 次`);
     }
@@ -145,7 +145,7 @@ async function main() {
           await cloudClient.login();
         }, {
           retries: 3,
-          minTimeout: 30000, // 重试间隔 30 秒
+          minTimeout: 20000, // 重试间隔 20 秒
           onRetry: (err, attempt) => {
             logger.warn(`登录请求超时，正在进行重试... 第 ${attempt} 次`);
           }
@@ -171,7 +171,7 @@ async function main() {
           return cloudClient.getUserSizeInfo();
         }, {
           retries: 3,
-          minTimeout: 30000, // 重试间隔 30 秒
+          minTimeout: 20000, // 重试间隔 20 秒
           onRetry: (err, attempt) => {
             logger.warn(`获取云盘容量请求超时，正在进行重试... 第 ${attempt} 次`);
           }
