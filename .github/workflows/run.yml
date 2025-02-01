@@ -9,7 +9,7 @@ on:
     types: started
   workflow_dispatch:
   schedule:
-    - cron: 30 18,22 * * *
+    - cron: 30 18 * * *
 
 jobs:
   build-and-deploy:
@@ -36,7 +36,7 @@ jobs:
         id: run
         uses: nick-fields/retry@master
         with:
-          timeout_minutes: 15
+          timeout_minutes: 40
           max_attempts: 3
           command: npm start
       - name: Keep Running
