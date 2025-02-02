@@ -206,7 +206,7 @@ async function main() {
       const events = recording.replay(); // 获取日志
       const content = events.map((e) => Array.isArray(e.data) ? e.data.join("") : String(e.data)).join("  \n");
       
-      await pushWxPusher("天翼云盘签到任务", content); // 先推送日志
+      await pushWxPusher("GQQ天翼云盘签到", content); // 先推送日志
       
     } catch (error) {
       logger.error("推送日志时发生错误：", error);
