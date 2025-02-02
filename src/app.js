@@ -137,7 +137,7 @@ async function main() {
     if (userName && password) {
       const userNameInfo = mask(userName, 3, 7);
       try {
-        logger.log(`${number}` + ".    " + `账户 ${userNameInfo} 开始执行`);
+        logger.log(`${number}` + ".    " + `账户 ${userNameInfo} 开始执行--------------`);
         const cloudClient = new CloudClient(userName, password);
         
         // 为登录操作添加重试机制
@@ -178,21 +178,19 @@ async function main() {
         });
         
         logger.log(
-          `个人：${(cloudCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G, 家庭：${(familyCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G`
+          `个人：${(cloudCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G, 家庭：${(familyCapacityInfo.totalSize / 1024 / 1024 / 1024).toFixed(2)}G\n`
         );
       } catch (e) {
         logger.error(e);
         if (e.code === "ETIMEDOUT") {
           throw e;
         }
-      } finally {
-        logger.log(`账户 ${userNameInfo} 执行完毕----------------`);
-      }
+      } 
     }
   }
 
   // 输出总家庭空间和每个账号获得的家庭空间
-  logger.log(`GQQ主账号今天共获得家庭空间：${totalFamilySpace}M`);
+  logger.log(`GQQ主账号今天共获得家庭空间：${totalFamilySpace}M\n`);
   accountFamilySpaces.forEach(( { account, familySpace }, index) => {
     logger.log(`${index + 1}. 账户${account} 获得：${familySpace}M`);
   });
